@@ -13,11 +13,13 @@ with open(path+'simulation_configuration.csv', newline='') as config_file :
 	fw = open(path+'config.glm', 'w')
 	fw.write('// Generated config.glm based on config/simulation_configuration.csv')
 	for line in fc : 
+		# if not line : 
+		# 	continue
 		if 'SIMULATION START TIME' in line[0] :
-			fw.write('\n#define STARTTIME=' + str(line[1]).strip(' '))
+			fw.write('\n#define STARTTIME="' + str(line[1]).strip(' ')+'"')
 			year = line[1].strip(' ')[0:4]
 		if 'SIMULATION STOP TIME' in line[0] :
-			fw.write('\n#define STOPTIME=' + str(line[1]).strip(' '))
+			fw.write('\n#define STOPTIME="' + str(line[1]).strip(' ')+'"')
 		if 'TIMEZONE' in line[0] :
 			fw.write('\n#define TIMEZONE=' + str(line[1]).strip(' '))
 		if 'WEATHER FILE' in line[0] : 
@@ -43,16 +45,26 @@ with open(path+'simulation_configuration.csv', newline='') as config_file :
 				print("RUNNING MODEL : " + model_name)
 			else :
 				print("ERROR: model name is invalid - Choose either ieee13 or ieee4")
-		if 'TOU PEAK START HOUR' in line[0] : 
+		if 'TOU PEAK START HOUR WINTER' in line[0] : 
 			if len(line[1].strip(" "))==1 : 
-				tou_start='0'+line[1].strip(" ")
+				tou_start_w='0'+line[1].strip(" ")
 			elif len(line[1].strip(" "))==2 : 
-				tou_start=line[1].strip(" ")
-		if 'TOU PEAK END HOUR' in line[0] : 
+				tou_start_w=line[1].strip(" ")
+		if 'TOU PEAK END HOUR WINTER' in line[0] : 
 			if len(line[1].strip(" "))==1 : 
-				tou_end='0'+line[1].strip(" ")
+				tou_end_w='0'+line[1].strip(" ")
 			elif len(line[1].strip(" "))==2 : 
-				tou_end=line[1].strip(" ")
+				tou_end_w=line[1].strip(" ")
+		if 'TOU PEAK START HOUR SUMMER' in line[0] : 
+			if len(line[1].strip(" "))==1 : 
+				tou_start_s='0'+line[1].strip(" ")
+			elif len(line[1].strip(" "))==2 : 
+				tou_start_s=line[1].strip(" ")
+		if 'TOU PEAK END HOUR SUMMER' in line[0] : 
+			if len(line[1].strip(" "))==1 : 
+				tou_end_s='0'+line[1].strip(" ")
+			elif len(line[1].strip(" "))==2 : 
+				tou_end_s=line[1].strip(" ")
 fw.close()
 sdate_w1 = date(int(year)-1, 12, 31)   # start date
 edate_w1 = date(int(year), 4,30)   # end date
@@ -80,13 +92,14 @@ elif tariff_type=='TOU' or tariff_type=='tou':
 			day = '\n'+str(s_list[s] + timedelta(days=i))
 			if s==1 : #summer
 				fw_tou.write(day + ' 00:00:00,'+str(TOU_summer))
-				fw_tou.write(day + ' '+tou_start+':00:00,'+str(TOU_summer*TOU_multiplier))
-				fw_tou.write(day + ' '+tou_end+':00:00,'+str(TOU_summer))
+				fw_tou.write(day + ' '+tou_start_s+':00:00,'+str(TOU_summer*TOU_multiplier))
+				fw_tou.write(day + ' '+tou_end_s+':00:00,'+str(TOU_summer))
 			else :
 				fw_tou.write(day + ' 00:00:00,'+str(TOU_winter))
-				fw_tou.write(day + ' '+tou_start+':00:00,'+str(TOU_winter*TOU_multiplier))
-				fw_tou.write(day + ' '+tou_end+':00:00,'+str(TOU_winter))
+				fw_tou.write(day + ' '+tou_start_w+':00:00,'+str(TOU_winter*TOU_multiplier))
+				fw_tou.write(day + ' '+tou_end_w+':00:00,'+str(TOU_winter))
 	fw_tou.close()
 # # RUNNING GRIDLABD 
 gridlabd.command(model_name+'/'+model_name+'.glm')
 gridlabd.start('wait')
+quit()
